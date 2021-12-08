@@ -1,4 +1,5 @@
 ﻿using Chernovik.db;
+using Chernovik.Views;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,11 +21,35 @@ namespace Chernovik
     /// <summary>
     /// Логика взаимодействия для MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
-    {
+    public partial class MainWindow : Window   
+    {  
+        static MainWindow window;
+
+        public static void Navigate(Page page)
+            {
+                window.mainFrame.Navigate(page);
+            }
+
+            private void BackPage(object sender, RoutedEventArgs e)
+            {
+                if (mainFrame.CanGoBack)
+                    mainFrame.GoBack();
+            }
+
+            private void ForwardPage(object sender, RoutedEventArgs e)
+            {
+                if (mainFrame.CanGoForward)
+                    mainFrame.GoForward();
+            }
+      
         public MainWindow()
         {
             InitializeComponent();
+            window = this;
+            Navigate(new MaterialList());
+
+          
+
             //var connection = DBInstance.Get();
             //string path = @"C:\Users\User\Desktop\Практика\Сессия 1\materialsupplier_b_import.csv";
             //var materials = connection.Material.ToList();
@@ -68,20 +93,20 @@ namespace Chernovik
             //    }) ;
 
             //}
-        //    for (int i = 1; i < rows.Length; i++)
-        //    {
-        //        var cols = rows[i].Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            //    for (int i = 1; i < rows.Length; i++)
+            //    {
+            //        var cols = rows[i].Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
 
-        //        Material material = materials.First(s => s.Title == cols[0]);
+            //        Material material = materials.First(s => s.Title == cols[0]);
 
-        //        Supplier supplier = supliers.First(s => s.Title == cols[1]);
-                
-        //        supplier.Material.Add(material);
-                   
-             
-        //}
+            //        Supplier supplier = supliers.First(s => s.Title == cols[1]);
 
-        //    connection.SaveChanges();
+            //        supplier.Material.Add(material);
+
+
+            //}
+
+            //    connection.SaveChanges();
         }
     }
 }
