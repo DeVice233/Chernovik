@@ -136,6 +136,7 @@ namespace Chernovik.ViewModels
                 {
                     Materials = searchResult.Skip(rowsOnPage * paginationPageIndex)
                         .Take(rowsOnPage).ToList();
+
                 }
             }
     }

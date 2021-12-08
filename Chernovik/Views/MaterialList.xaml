@@ -35,13 +35,13 @@
                 <ComboBox Width="200" DisplayMemberPath="Name" ItemsSource="{Binding TypeFilter}" SelectedItem="{Binding SelectedTypeFilter}"/>
             </StackPanel>
         </Grid>
-        <ListBox Grid.Row="1" ItemsSource="{Binding Materials}" SelectedItem="{Binding SelectedMaterial}">
+        <ListBox Grid.Row="1" ItemsSource="{Binding Materials}" SelectedItem="{Binding SelectedMaterial}" HorizontalContentAlignment="Stretch" >
             <ListBox.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate >
                     <Grid Background="White" >
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
-                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition />
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <Image Source="{Binding Image}" Width="100" Height="100" Grid.Column="0" HorizontalAlignment="Left"/>
@@ -55,8 +55,8 @@
                                 <Label Content="Минимальное Количество:"/>
                                 <Label Content="{Binding MinCount}"/>
                             </StackPanel>
-                            
-                                <StackPanel Orientation="Horizontal" >
+
+                            <StackPanel Orientation="Horizontal" >
                                 <Label Content="Поставщики: "/>
                                 <Label Content="{Binding Supplier}"/>
                             </StackPanel>
@@ -70,8 +70,10 @@
                         </StackPanel>
 
                     </Grid>
+
                 </DataTemplate>
             </ListBox.ItemTemplate>
+            
         </ListBox>
         <StackPanel Grid.Row="2" Orientation="Horizontal">
              <Label Content="{Binding SearchCountRows}"/>
