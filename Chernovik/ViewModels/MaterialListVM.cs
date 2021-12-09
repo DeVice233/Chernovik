@@ -202,7 +202,23 @@ namespace Chernovik.ViewModels
             SortTypes.AddRange(new string[] { "Наименование", "Остаток", "Стоимость"});
             selectedSortType = SortTypes.First();
 
-          
+            foreach (var mat in Materials)
+            {
+                if (mat.CountInStock < mat.MinCount)
+                {
+                    mat.ColorForXaml = "#f19292";
+                }
+                else if (mat.CountInStock > mat.MinCount * 3)
+                {
+                    mat.ColorForXaml = "#ffba01";
+                }
+                foreach (var sup in mat.Supplier)
+                {
+                    if (sup != mat.Supplier.Last())
+                         mat.SupplierString += $"{sup.Title}, ";
+                    mat.SupplierString += $"{sup.Title}";
+                }
+            }
 
             BackPage = new CustomCommand(() => {
                 if (searchResult == null)

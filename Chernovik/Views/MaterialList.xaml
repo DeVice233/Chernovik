@@ -54,9 +54,9 @@
         <ListBox Grid.Row="1" ItemsSource="{Binding Materials}" SelectedItem="{Binding SelectedMaterial}" HorizontalContentAlignment="Stretch" >
             <ListBox.ItemTemplate>
                 <DataTemplate >
-                    <Grid Background="White" >
+                    <Grid Background="{Binding ColorForXaml}" >
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
+                            <ColumnDefinition Width="auto"/>
                             <ColumnDefinition />
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
@@ -74,7 +74,7 @@
 
                             <StackPanel Orientation="Horizontal" >
                                 <Label Content="Поставщики: "/>
-                                <Label Content="{Binding Supplier}"/>
+                                <Label Content="{Binding SupplierString}"/>
                             </StackPanel>
 
 
