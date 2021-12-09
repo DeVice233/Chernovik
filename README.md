@@ -14,5 +14,4 @@
 
 
 ### Как видим *плюсов* больше, рекомендую
-
-![image](https://user-images.githubusercontent.com/73586312/145390322-11a67452-b0c2-4aef-bf64-42e377d75031.png)
+![image](https://user-images.githubusercontent.com/73586312/145390621-647d47b5-0efe-49f9-834c-0ef7c56126a0.png)
