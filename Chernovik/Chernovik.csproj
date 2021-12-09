@@ -76,7 +76,7 @@
     <Compile Include="db\AgentType.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
-    <Compile Include="db\Сlient.cs" />
+    <Compile Include="db\Мaterial.cs" />
     <Compile Include="db\DBInstance.cs" />
     <Compile Include="db\Material.cs">
       <DependentUpon>Model1.tt</DependentUpon>
