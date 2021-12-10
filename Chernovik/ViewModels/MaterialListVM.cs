@@ -22,6 +22,16 @@ namespace Chernovik.ViewModels
                 SignalChanged();
             }
         }
+        private Material selectedMaterial;
+        public Material SelectedMaterial
+        {
+            get => selectedMaterial;
+            set
+            {
+                selectedMaterial = value;
+                SignalChanged();
+            }
+        }
         private List<MaterialType> materialTypes;
         public List<MaterialType> MaterialTypes
         {
@@ -179,6 +189,8 @@ namespace Chernovik.ViewModels
         public CustomCommand BackPage { get; set; }
         public CustomCommand ForwardPage { get; set; }
         public CustomCommand ChangeMinCount { get; set; }
+        public CustomCommand AddMaterial { get; set; }
+        public CustomCommand EditMaterial { get; set; }
 
         private MaterialType selectedMaterialTypeFilter;
         public int rows = 0;
@@ -247,8 +259,6 @@ namespace Chernovik.ViewModels
 
             });
 
-            
-
             ForwardPage = new CustomCommand(() =>
             {
                 if (searchResult == null)
@@ -265,6 +275,22 @@ namespace Chernovik.ViewModels
                 Pagination();
 
             });
+
+
+            AddMaterial = new CustomCommand(() =>
+            {
+                AddMaterial addMaterial = new AddMaterial(new Material());
+                addMaterial.ShowDialog();
+            });
+
+            EditMaterial = new CustomCommand(() =>
+            {
+                if (SelectedMaterial == null) return;
+                AddMaterial addMaterial = new AddMaterial(SelectedMaterial);
+                addMaterial.ShowDialog();
+
+            });
+
             searchResult = DBInstance.Get().Material.ToList();
 
             InitPagination();

@@ -92,6 +92,7 @@
             <ListBox.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Изменить минимальное количество на..." Click="MenuItem_Click"  Command="{Binding ChangeMinCount}"/>
+                    <MenuItem Header="Редактировать" Command="{Binding EditMaterial}"/>
                 </ContextMenu>
             </ListBox.ContextMenu>
         </ListBox> 
@@ -106,7 +107,8 @@
         <StackPanel Orientation="Horizontal" Grid.Column="2" HorizontalAlignment="Right">
             <Label Content="Кол-во записей на странице:"/>
             <ComboBox Width="200" ItemsSource="{Binding ViewCountRows}" SelectedItem="{Binding SelectedViewCountRows}"/>
-        </StackPanel>
+                <Button Content="Создать материал" Command="{Binding AddMaterial}"/>
+            </StackPanel>
         </StackPanel>
        
     </Grid>
