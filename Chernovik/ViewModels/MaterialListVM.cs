@@ -1,5 +1,6 @@
 ﻿using Chernovik.db;
 using Chernovik.mvvm;
+using Chernovik.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -138,8 +139,8 @@ namespace Chernovik.ViewModels
                     searchResult.Sort((x, y) => x.Cost.CompareTo(y.Cost));
             }
             paginationPageIndex = 0;
-                Pagination();
-           
+            Pagination();
+
         }
         public List<string> SearchType { get; set; }
         private string selectedSearchType;
@@ -163,9 +164,21 @@ namespace Chernovik.ViewModels
                 Sort();
             }
         }
-        
+
+        private ObservableCollection<Material> selectedMaterials;
+        public ObservableCollection<Material> SelectedMaterials
+        {
+            get => selectedMaterials;
+            set
+            {
+                selectedMaterials = value;
+                SignalChanged();
+            }
+        }
+
         public CustomCommand BackPage { get; set; }
         public CustomCommand ForwardPage { get; set; }
+        public CustomCommand ChangeMinCount { get; set; }
 
         private MaterialType selectedMaterialTypeFilter;
         public int rows = 0;
@@ -177,10 +190,12 @@ namespace Chernovik.ViewModels
         public MaterialListVM()
         {
             var connection = DBInstance.Get();
-           
+
             Materials = new List<Material>(connection.Material.ToList());
             MaterialTypes = new List<MaterialType>(connection.MaterialType.ToList());
             Suppliers = new List<Supplier>(connection.Supplier.ToList());
+
+            SelectedMaterials = new ObservableCollection<Material>();
 
             MaterialTypeFilter = DBInstance.Get().MaterialType.ToList();
             MaterialTypeFilter.Add(new MaterialType { Title = "Все типы" });
@@ -199,7 +214,7 @@ namespace Chernovik.ViewModels
             selectedSearchType = SearchType.First();
 
             SortTypes = new List<string>();
-            SortTypes.AddRange(new string[] { "Наименование", "Остаток", "Стоимость"});
+            SortTypes.AddRange(new string[] { "Наименование", "Остаток", "Стоимость" });
             selectedSortType = SortTypes.First();
 
             foreach (var mat in Materials)
@@ -214,21 +229,26 @@ namespace Chernovik.ViewModels
                 }
                 foreach (var sup in mat.Supplier)
                 {
-                    if (sup != mat.Supplier.Last())
-                         mat.SupplierString += $"{sup.Title}, ";
+                    mat.SupplierString = "";
+                       if (sup != mat.Supplier.Last())
+                        mat.SupplierString += $"{sup.Title}, ";
                     mat.SupplierString += $"{sup.Title}";
+                
                 }
             }
 
-            BackPage = new CustomCommand(() => {
+            BackPage = new CustomCommand(() =>
+            {
                 if (searchResult == null)
                     return;
                 if (paginationPageIndex > 0)
                     paginationPageIndex--;
                 Pagination();
-               
+
             });
+
             
+
             ForwardPage = new CustomCommand(() =>
             {
                 if (searchResult == null)
@@ -236,42 +256,47 @@ namespace Chernovik.ViewModels
                 int.TryParse(SelectedViewCountRows, out int rowsOnPage);
                 if (rowsOnPage == 0)
                     return;
-               int countPage = searchResult.Count() / rowsOnPage;
+                int countPage = searchResult.Count() / rowsOnPage;
                 CountPages = countPage;
                 if (searchResult.Count() % rowsOnPage != 0)
                     countPage++;
                 if (countPage > paginationPageIndex + 1)
                     paginationPageIndex++;
                 Pagination();
-                
+
             });
-            searchResult = DBInstance.Get().Material.ToList(); 
-           
-                InitPagination();
-                Pagination();
-           
+            searchResult = DBInstance.Get().Material.ToList();
+
+            InitPagination();
+            Pagination();
+
+        }
+        public MaterialListVM(List<Material> materials) : this()
+        {
+            ModalWindow modalWindow = new ModalWindow(materials);
+            modalWindow.ShowDialog();
         }
         private void InitPagination()
+        {
+            SearchCountRows = $"Найдено записей: {searchResult.Count} из {DBInstance.Get().Material.Count()}";
+            paginationPageIndex = 0;
+        }
+
+        private void Pagination()
+        {
+            int rowsOnPage = 0;
+            if (!int.TryParse(SelectedViewCountRows, out rowsOnPage))
             {
-                SearchCountRows = $"Найдено записей: {searchResult.Count} из {DBInstance.Get().Material.Count()}";
-                paginationPageIndex = 0;
+                Materials = searchResult;
+            }
+            else
+            {
+                Materials = searchResult.Skip(rowsOnPage * paginationPageIndex)
+                    .Take(rowsOnPage).ToList();
+
             }
 
-            private void Pagination()
-            {
-                int rowsOnPage = 0;
-                if (!int.TryParse(SelectedViewCountRows, out rowsOnPage))
-                {
-                    Materials = searchResult;
-                }
-                else
-                {
-                    Materials = searchResult.Skip(rowsOnPage * paginationPageIndex)
-                        .Take(rowsOnPage).ToList();
-
-                }
-           
-            int.TryParse(SelectedViewCountRows,out rows);
+            int.TryParse(SelectedViewCountRows, out rows);
             CountPages = searchResult.Count() / rows;
             Pages = $"{paginationPageIndex + 1}/{CountPages + 1}";
         }
@@ -289,17 +314,18 @@ namespace Chernovik.ViewModels
             }
             else
             {
- if (SelectedSearchType == "Наименование")
-                searchResult = DBInstance.Get().Material
-                    .Where(c => c.Title.ToLower().Contains(search) && c.MaterialType.Title.Contains(SelectedMaterialTypeFilter.Title)).ToList();
-            else if (SelectedSearchType == "Описание")
-                searchResult = DBInstance.Get().Material
-                    .Where(c => c.Description.ToLower().Contains(search) && c.MaterialType.Title.Contains(SelectedMaterialTypeFilter.Title)).ToList();
+                if (SelectedSearchType == "Наименование")
+                    searchResult = DBInstance.Get().Material
+                        .Where(c => c.Title.ToLower().Contains(search) && c.MaterialType.Title.Contains(SelectedMaterialTypeFilter.Title)).ToList();
+                else if (SelectedSearchType == "Описание")
+                    searchResult = DBInstance.Get().Material
+                        .Where(c => c.Description.ToLower().Contains(search) && c.MaterialType.Title.Contains(SelectedMaterialTypeFilter.Title)).ToList();
             }
-           
+
             Sort();
             InitPagination();
             Pagination();
         }
     }
+   
 }

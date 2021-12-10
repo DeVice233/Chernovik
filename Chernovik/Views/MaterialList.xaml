@@ -51,7 +51,7 @@
             </StackPanel>
             
         </Grid>
-        <ListBox Grid.Row="1" ItemsSource="{Binding Materials}" SelectedItem="{Binding SelectedMaterial}" HorizontalContentAlignment="Stretch" >
+        <ListBox Grid.Row="1" ItemsSource="{Binding Materials}" Name="list" SelectedItem="{Binding SelectedMaterial}" HorizontalContentAlignment="Stretch" SelectionMode="Extended">
             <ListBox.ItemTemplate>
                 <DataTemplate >
                     <Grid Background="{Binding ColorForXaml}" >
@@ -89,8 +89,13 @@
 
                 </DataTemplate>
             </ListBox.ItemTemplate>
-            
-        </ListBox>
+            <ListBox.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Изменить минимальное количество на..." Click="MenuItem_Click"  Command="{Binding ChangeMinCount}"/>
+                </ContextMenu>
+            </ListBox.ContextMenu>
+        </ListBox> 
+       
         <StackPanel Grid.Row="2" Orientation="Horizontal">
              <Label Content="{Binding SearchCountRows}"/>
         <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">

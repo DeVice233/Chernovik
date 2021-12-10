@@ -116,8 +116,12 @@
     <Compile Include="mvvm\BaseViewModel.cs" />
     <Compile Include="mvvm\CustomCommand.cs" />
     <Compile Include="ViewModels\MaterialListVM.cs" />
+    <Compile Include="ViewModels\ModalWindowVM.cs" />
     <Compile Include="Views\MaterialList.xaml.cs">
       <DependentUpon>MaterialList.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ModalWindow.xaml.cs">
+      <DependentUpon>ModalWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -132,6 +136,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Views\MaterialList.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ModalWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

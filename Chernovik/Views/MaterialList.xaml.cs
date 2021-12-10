@@ -1,4 +1,5 @@
-﻿using Chernovik.ViewModels;
+﻿using Chernovik.db;
+using Chernovik.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,13 +22,25 @@ namespace Chernovik.Views
     /// </summary>
     public partial class MaterialList : Page
     {
-        
+        public  List<Material> Materials = new List<Material>();
         public MaterialList()
         {
             InitializeComponent();
             DataContext = new MaterialListVM();
+           
+        }
 
-
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            foreach(var mat in list.SelectedItems)
+            {
+                if(mat is Material)
+                {
+                    Materials.Add((Material)mat);
+                    
+                }
+            }
+            DataContext = new MaterialListVM(Materials);
         }
     }
 }
