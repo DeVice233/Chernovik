@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Chernovik"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Черновик" Height="700" Width="1300" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -21,13 +21,9 @@
                 <RowDefinition />
                 <RowDefinition />
             </Grid.RowDefinitions>
-            <Image Grid.RowSpan="2" Width="100"/>
+            <Image Grid.RowSpan="2" Width="100" Source="Черновик.png"/>
             <Label Grid.Column="1" Grid.RowSpan="2" FontSize="50" Foreground="{StaticResource Attention}" Content="Черновик"/>
-            <Label Content="Навигация" VerticalAlignment="Bottom" Grid.Column="2"/>
-            <StackPanel  Grid.Row="1" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Bottom">
-                <Button Content="Назад" Click="BackPage"/>
-                <Button Content="Вперед" Click="ForwardPage"/>
-            </StackPanel>
+            
         </Grid>
         <Frame Name="mainFrame" Grid.Row="1" NavigationUIVisibility="Hidden" />
     </Grid>

@@ -5,14 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Chernovik.Views"
         mc:Ignorable="d"
-        Title="AddMaterial" Height="450" Width="800">
+        Title="Редактирование материала" Height="500" Width="900" WindowStartupLocation="CenterScreen" Name="AddMaterialWindow" ResizeMode="NoResize">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition/>
+            <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
@@ -42,7 +44,7 @@
            
             <StackPanel Width="200">
                 <Label Content="Тип материала:"/>
-                <ComboBox ItemsSource="{Binding MaterialType}" DisplayMemberPath="Title" SelectedItem="{Binding SelectedMaterialType}"/>
+                <ComboBox ItemsSource="{Binding MaterialTypes}" DisplayMemberPath="Title" SelectedItem="{Binding SelectedMaterialType}"/>
             </StackPanel>
             <StackPanel Grid.Column="1">
                 <Label Content="Фото:"/>
@@ -50,6 +52,25 @@
                   <Button Content="Выбрать изображение" Command="{Binding SelectImage}"/>
             </StackPanel>
         </StackPanel>
-     
+        <StackPanel Grid.Column="2">
+            <Label Content="Возможные поставщики:" Height="30"/>
+            <ListBox Height="170" ItemsSource="{Binding SelectedMaterialSuppliers}" SelectedItem="{Binding SelectedMaterialSupplier}" DisplayMemberPath="Title">
+                
+            </ListBox>
+        </StackPanel>
+        <StackPanel Grid.Column="3" Grid.Row="0">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Поиск"/>
+                <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Width="163"/>
+            </StackPanel>
+            <ComboBox ItemsSource="{Binding Supplier}" SelectedItem="{Binding SelectedSupplier}" DisplayMemberPath="Title"/>
+            <Button Width="100" Content="Добавить" Margin="0 70 0 0" Height="30" VerticalAlignment="Bottom" Command="{Binding AddSupplier}"/>
+            <Button Width="100" Content="Убрать" Height="30" VerticalAlignment="Bottom" Command="{Binding RemoveSupplier}"/>
+        </StackPanel>
+        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal">
+            <Button  Content="Отмена" HorizontalAlignment="Left" Click="Button_Click"/>
+            <Button Command="{Binding Save}"  Content="Сохранить" HorizontalAlignment="Right" Click="Button_Click"/>
+            
+        </StackPanel>
     </Grid>
 </Window>

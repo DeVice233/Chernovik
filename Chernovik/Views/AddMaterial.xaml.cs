@@ -31,5 +31,10 @@ namespace Chernovik.Views
             InitializeComponent();
             DataContext = new AddMaterialVM(material);
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            //this.Close();
+        }
     }
 }

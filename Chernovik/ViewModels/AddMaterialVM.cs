@@ -3,6 +3,7 @@ using Chernovik.mvvm;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,17 @@ namespace Chernovik.ViewModels
 {
     public class AddMaterialVM : BaseViewModel
     {
+        private string searchText = "";
+        public string SearchText
+        {
+            get => searchText;
+            set
+            {
+                searchText = value;
+                Search();
+            }
+        }
+
         private BitmapImage imageMaterial;
         public BitmapImage ImageMaterial
         {
@@ -24,23 +36,52 @@ namespace Chernovik.ViewModels
                 SignalChanged();
             }
         }
+        List<Supplier> searchResult;
+
+        public Supplier SelectedMaterialSupplier { get; set; }
+        private ObservableCollection<Supplier> selectedMaterialSuppliers;
+        public ObservableCollection<Supplier> SelectedMaterialSuppliers
+        {
+            get => selectedMaterialSuppliers;
+            set
+            {
+                selectedMaterialSuppliers = value;
+                SignalChanged();
+            }
+        }
 
         public Material AddMaterial { get;set; }
-        public MaterialType SelectedMaterialType { get; set; }
+  
 
-        public List<Supplier> Supplier { get; set; }
-        public List<MaterialType> MaterialType { get; set; }
+        public Supplier SelectedSupplier { get; set; }
+        private List<Supplier> supplier;
+        public List<Supplier> Supplier {
+            get => supplier; 
+            set
+            {
+                supplier = value;
+                SignalChanged();
+            }
+
+        }
+
+        public List<MaterialType> MaterialTypes { get; set; }
+      public MaterialType SelectedMaterialType { get; set; }
 
         public CustomCommand SelectImage { get; set; }
+        public CustomCommand RemoveSupplier { get; set; }
+        public CustomCommand AddSupplier { get; set; }
+        public CustomCommand Save { get; set; }
 
         public AddMaterialVM(Material material)
         {
-            Supplier = DBInstance.Get().Supplier.ToList();
-            MaterialType = DBInstance.Get().MaterialType.ToList();
+            var connection = DBInstance.Get();
+            Supplier = connection.Supplier.ToList();
+            MaterialTypes = connection.MaterialType.ToList();
 
             if (material == null)
             {
-                AddMaterial = new Material();
+                AddMaterial = new Material { Image = @"\materials\picture.png", MaterialType = MaterialTypes.First()};
             }
             else
             {
@@ -51,6 +92,9 @@ namespace Chernovik.ViewModels
                     MaterialType = material.MaterialType,
                     MinCount = material.MinCount,
                     Cost = material.Cost,
+                    MaterialTypeID = material.MaterialTypeID,
+                    MaterialCountHistory = material.MaterialCountHistory,
+                    ProductMaterial = material.ProductMaterial,
                     CountInPack = material.CountInPack,
                     CountInStock = material.CountInStock,
                     Supplier = material.Supplier,
@@ -58,10 +102,14 @@ namespace Chernovik.ViewModels
                     Description = material.Description,
                     Unit = material.Unit
                 };
-                SelectedMaterialType = material.MaterialType;
-                string directory = Environment.CurrentDirectory;
-                ImageMaterial = GetImageFromPath(directory.Substring(0,directory.Length - 10) + "\\" + material.Image);
-            }
+                if (material.Supplier != null)
+                {
+                     SelectedMaterialSuppliers = new ObservableCollection<Supplier>(material.Supplier);
+                }
+            } 
+            SelectedMaterialType = AddMaterial.MaterialType;
+            string directory = Environment.CurrentDirectory;
+            ImageMaterial = GetImageFromPath(directory.Substring(0, directory.Length - 10) + "\\" + AddMaterial.Image);
             SelectImage = new CustomCommand(() =>
             {
                 OpenFileDialog ofd = new OpenFileDialog();
@@ -72,7 +120,7 @@ namespace Chernovik.ViewModels
                         var info = new FileInfo(ofd.FileName);
                         ImageMaterial = GetImageFromPath(ofd.FileName);
                         AddMaterial.Image = $"/materials/{info.Name}";
-                        var newPath = Environment.CurrentDirectory + AddMaterial.Image;
+                        var newPath = directory.Substring(0, directory.Length - 10) + AddMaterial.Image;
                         File.Copy(ofd.FileName, newPath);
                     }
                     catch (Exception e)
@@ -82,9 +130,70 @@ namespace Chernovik.ViewModels
                 }
             });
 
+            AddSupplier = new CustomCommand(() =>
+            {
+                if (SelectedSupplier == null)
+                {
+                    MessageBox.Show("Нужно выбрать поставщика из выпадающего списка!", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                } 
+                else if (!SelectedMaterialSuppliers.Contains(SelectedSupplier))
+                {
+                    MessageBox.Show("Материал уже содержит выбранный элемент!", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+                else
+                {
+                SelectedMaterialSuppliers.Add(SelectedSupplier);
+                SignalChanged("SelectedMaterialSuppliers");
+                }
+              
+            });
 
+            RemoveSupplier = new CustomCommand(() =>
+            {
+                if (SelectedSupplier == null)
+                {
+                    MessageBox.Show("Нужно выбрать поставщика из списка !", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                else
+                {
+                     SelectedMaterialSuppliers.Remove(SelectedMaterialSupplier);
+                     SignalChanged("SelectedMaterialSuppliers");
+                }
+                
+            });
 
+            Save = new CustomCommand(() =>
+            { 
 
+                try
+                 {
+                    AddMaterial.Supplier = SelectedMaterialSuppliers;
+                    if (AddMaterial.ID == 0)
+                        connection.Material.Add(AddMaterial);
+                    else
+                        connection.Entry(material).CurrentValues.SetValues(AddMaterial);
+                    material.Supplier = AddMaterial.Supplier;
+                    connection.SaveChanges();
+
+                    foreach(Window window in Application.Current.Windows)
+                    {
+                        if(window.DataContext == this)
+                        {
+                            CloseWin(window);
+                        }
+                    }
+                   
+                    SignalChanged("Material");
+                 }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.Message);
+                };
+            });
+
+            searchResult = connection.Supplier.ToList();
         }
 
         private BitmapImage GetImageFromPath(string url)
@@ -95,6 +204,21 @@ namespace Chernovik.ViewModels
             img.UriSource = new Uri(url, UriKind.Absolute);
             img.EndInit();
             return img;
+        }
+
+        private void Search()
+        {
+            var search = SearchText.ToLower();
+            searchResult = DBInstance.Get().Supplier
+                        .Where(c => c.Title.ToLower().Contains(search)).ToList();
+            Supplier = searchResult;
+            SignalChanged("Supplier");
+        }
+
+        public void CloseWin(object obj)
+        {
+            Window win = obj as Window;
+            win.Close();
         }
     }
 }

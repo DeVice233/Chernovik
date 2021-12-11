@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:Chernovik.Views"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="MaterialList" Background="white">
+      Title="Список материалов" Background="white" >
 
     <Grid>
         <Grid.RowDefinitions>

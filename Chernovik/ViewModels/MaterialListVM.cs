@@ -229,25 +229,7 @@ namespace Chernovik.ViewModels
             SortTypes.AddRange(new string[] { "Наименование", "Остаток", "Стоимость" });
             selectedSortType = SortTypes.First();
 
-            foreach (var mat in Materials)
-            {
-                if (mat.CountInStock < mat.MinCount)
-                {
-                    mat.ColorForXaml = "#f19292";
-                }
-                else if (mat.CountInStock > mat.MinCount * 3)
-                {
-                    mat.ColorForXaml = "#ffba01";
-                }
-                foreach (var sup in mat.Supplier)
-                {
-                    mat.SupplierString = "";
-                       if (sup != mat.Supplier.Last())
-                        mat.SupplierString += $"{sup.Title}, ";
-                    mat.SupplierString += $"{sup.Title}";
-                
-                }
-            }
+            LoadEntities();
 
             BackPage = new CustomCommand(() =>
             {
@@ -256,7 +238,6 @@ namespace Chernovik.ViewModels
                 if (paginationPageIndex > 0)
                     paginationPageIndex--;
                 Pagination();
-
             });
 
             ForwardPage = new CustomCommand(() =>
@@ -279,16 +260,21 @@ namespace Chernovik.ViewModels
 
             AddMaterial = new CustomCommand(() =>
             {
-                AddMaterial addMaterial = new AddMaterial(new Material());
+                AddMaterial addMaterial = new AddMaterial();
                 addMaterial.ShowDialog();
+                LoadEntities();
+                InitPagination();
+                Pagination();
             });
 
             EditMaterial = new CustomCommand(() =>
             {
-                if (SelectedMaterial == null) return;
+                if (SelectedMaterial == null) return; 
                 AddMaterial addMaterial = new AddMaterial(SelectedMaterial);
                 addMaterial.ShowDialog();
-
+                LoadEntities();
+                InitPagination();
+                Pagination();
             });
 
             searchResult = DBInstance.Get().Material.ToList();
@@ -323,7 +309,7 @@ namespace Chernovik.ViewModels
             }
 
             int.TryParse(SelectedViewCountRows, out rows);
-            CountPages = searchResult.Count() / rows;
+            CountPages = (searchResult.Count() - 1) / rows;
             Pages = $"{paginationPageIndex + 1}/{CountPages + 1}";
         }
         private void Search()
@@ -352,6 +338,34 @@ namespace Chernovik.ViewModels
             InitPagination();
             Pagination();
         }
+        public void LoadEntities()
+        {
+            Materials = new List<Material>(DBInstance.Get().Material.ToList());
+                MaterialTypes = new List<MaterialType>(DBInstance.Get().MaterialType.ToList());
+                Suppliers = new List<Supplier>(DBInstance.Get().Supplier.ToList());
+            foreach (var mat in Materials)
+            {
+               
+                if (mat.CountInStock < mat.MinCount)
+                {
+                    mat.ColorForXaml = "#f19292";
+                }
+                else if (mat.CountInStock > mat.MinCount * 3)
+                {
+                    mat.ColorForXaml = "#ffba01";
+                }
+                mat.SupplierString = "";
+                foreach (var sup in mat.Supplier)
+                {
+                    if (sup != mat.Supplier.Last())
+                        mat.SupplierString += $"{sup.Title}, ";
+                    else
+                    mat.SupplierString += $"{sup.Title}";
+                }
+            }
+        }
+
+
     }
    
 }

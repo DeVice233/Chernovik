@@ -207,6 +207,7 @@
       <DependentUpon>Model1.edmx</DependentUpon>
       <LastGenOutput>Model1.cs</LastGenOutput>
     </Content>
+    <Resource Include="Черновик.png" />
     <Resource Include="materials\picture.png" />
     <Resource Include="materials\material_1.jpeg" />
     <Resource Include="materials\material_10.jpeg" />
