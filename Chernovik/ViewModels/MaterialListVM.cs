@@ -340,9 +340,10 @@ namespace Chernovik.ViewModels
         }
         public void LoadEntities()
         {
-            Materials = new List<Material>(DBInstance.Get().Material.ToList());
+                Materials = new List<Material>(DBInstance.Get().Material.ToList());
                 MaterialTypes = new List<MaterialType>(DBInstance.Get().MaterialType.ToList());
                 Suppliers = new List<Supplier>(DBInstance.Get().Supplier.ToList());
+                searchResult = DBInstance.Get().Material.ToList();
             foreach (var mat in Materials)
             {
                

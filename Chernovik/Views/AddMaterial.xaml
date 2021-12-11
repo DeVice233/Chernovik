@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Chernovik.Views"
         mc:Ignorable="d"
-        Title="Редактирование материала" Height="500" Width="900" WindowStartupLocation="CenterScreen" Name="AddMaterialWindow" ResizeMode="NoResize">
+        Title="Редактирование материала" Height="500" Width="900" WindowStartupLocation="CenterScreen"  ResizeMode="NoResize">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
@@ -67,9 +67,13 @@
             <Button Width="100" Content="Добавить" Margin="0 70 0 0" Height="30" VerticalAlignment="Bottom" Command="{Binding AddSupplier}"/>
             <Button Width="100" Content="Убрать" Height="30" VerticalAlignment="Bottom" Command="{Binding RemoveSupplier}"/>
         </StackPanel>
+        <StackPanel Grid.Column="2" Grid.Row="1" DataContext="{Binding AddMaterial}">
+            <Label Content="Описание:"/>
+            <TextBox AcceptsReturn="True" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap"  Height="180" Text="{Binding Description}"/>
+        </StackPanel>
         <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal">
-            <Button  Content="Отмена" HorizontalAlignment="Left" Click="Button_Click"/>
-            <Button Command="{Binding Save}"  Content="Сохранить" HorizontalAlignment="Right" Click="Button_Click"/>
+            <Button Command="{Binding Cancel}" Content="Отмена" HorizontalAlignment="Left"/>
+            <Button Command="{Binding Save}"  Content="Сохранить" HorizontalAlignment="Right"/>
             
         </StackPanel>
     </Grid>

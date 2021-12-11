@@ -39,7 +39,7 @@ namespace Chernovik.ViewModels
         List<Supplier> searchResult;
 
         public Supplier SelectedMaterialSupplier { get; set; }
-        private ObservableCollection<Supplier> selectedMaterialSuppliers;
+        private ObservableCollection<Supplier> selectedMaterialSuppliers = new ObservableCollection<Supplier>();
         public ObservableCollection<Supplier> SelectedMaterialSuppliers
         {
             get => selectedMaterialSuppliers;
@@ -72,6 +72,7 @@ namespace Chernovik.ViewModels
         public CustomCommand RemoveSupplier { get; set; }
         public CustomCommand AddSupplier { get; set; }
         public CustomCommand Save { get; set; }
+        public CustomCommand Cancel { get; set; }
 
         public AddMaterialVM(Material material)
         {
@@ -110,6 +111,7 @@ namespace Chernovik.ViewModels
             SelectedMaterialType = AddMaterial.MaterialType;
             string directory = Environment.CurrentDirectory;
             ImageMaterial = GetImageFromPath(directory.Substring(0, directory.Length - 10) + "\\" + AddMaterial.Image);
+
             SelectImage = new CustomCommand(() =>
             {
                 OpenFileDialog ofd = new OpenFileDialog();
@@ -137,7 +139,7 @@ namespace Chernovik.ViewModels
                     MessageBox.Show("Нужно выбрать поставщика из выпадающего списка!", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 } 
-                else if (!SelectedMaterialSuppliers.Contains(SelectedSupplier))
+                else if (SelectedMaterialSuppliers.Contains(SelectedSupplier))
                 {
                     MessageBox.Show("Материал уже содержит выбранный элемент!", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
@@ -165,32 +167,55 @@ namespace Chernovik.ViewModels
             });
 
             Save = new CustomCommand(() =>
-            { 
-
-                try
-                 {
-                    AddMaterial.Supplier = SelectedMaterialSuppliers;
-                    if (AddMaterial.ID == 0)
-                        connection.Material.Add(AddMaterial);
-                    else
-                        connection.Entry(material).CurrentValues.SetValues(AddMaterial);
-                    material.Supplier = AddMaterial.Supplier;
-                    connection.SaveChanges();
-
-                    foreach(Window window in Application.Current.Windows)
+            {
+                if (AddMaterial.Cost < 0 || AddMaterial.CountInStock < 0)
+                {
+                    MessageBox.Show("Проверьте правильность заполнения данных!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                MessageBoxResult result = MessageBox.Show("Сохранить изменения?", "Подтвердите действие", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
                     {
-                        if(window.DataContext == this)
+                        AddMaterial.Supplier = SelectedMaterialSuppliers;
+                        if (AddMaterial.ID == 0)
+                            connection.Material.Add(AddMaterial);
+                        else
+                        {
+                        connection.Entry(material).CurrentValues.SetValues(AddMaterial);
+                        material.Supplier = AddMaterial.Supplier;
+                        } 
+                        connection.SaveChanges();
+
+                        foreach (Window window in Application.Current.Windows)
+                        {
+                            if (window.DataContext == this)  CloseWin(window);
+                        }
+
+                        SignalChanged("Material");
+                    }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show(e.Message);
+                    };
+                }
+                else return;
+               
+            });
+
+            Cancel = new CustomCommand(() =>
+            {
+                MessageBoxResult result = MessageBox.Show("Отменить изменения?", "Подтвердите действие", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                    foreach (Window window in Application.Current.Windows)
+                    {
+                        if (window.DataContext == this)
                         {
                             CloseWin(window);
                         }
                     }
-                   
-                    SignalChanged("Material");
-                 }
-                catch (Exception e)
-                {
-                    MessageBox.Show(e.Message);
-                };
+                else return;
             });
 
             searchResult = connection.Supplier.ToList();
