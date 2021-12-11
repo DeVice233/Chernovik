@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
 
@@ -50,13 +48,14 @@ namespace Chernovik.ViewModels
             }
         }
 
-        public Material AddMaterial { get;set; }
-  
+        public Material AddMaterial { get; set; }
+
 
         public Supplier SelectedSupplier { get; set; }
         private List<Supplier> supplier;
-        public List<Supplier> Supplier {
-            get => supplier; 
+        public List<Supplier> Supplier
+        {
+            get => supplier;
             set
             {
                 supplier = value;
@@ -65,14 +64,23 @@ namespace Chernovik.ViewModels
 
         }
 
+        public List<ProductMaterial> ProductMaterials;
+        public List<MaterialCountHistory> MaterialCountHistorys;
+
         public List<MaterialType> MaterialTypes { get; set; }
-      public MaterialType SelectedMaterialType { get; set; }
+        public MaterialType SelectedMaterialType { get; set; }
 
         public CustomCommand SelectImage { get; set; }
         public CustomCommand RemoveSupplier { get; set; }
         public CustomCommand AddSupplier { get; set; }
         public CustomCommand Save { get; set; }
         public CustomCommand Cancel { get; set; }
+        public CustomCommand Delete { get; set; }
+
+        public int NeedToStore { get; set; }
+        public string Unit { get; set; }
+        public double MinCountToBuy { get; set; }
+        public decimal MinCountCost { get; set; }
 
         public AddMaterialVM(Material material)
         {
@@ -82,7 +90,7 @@ namespace Chernovik.ViewModels
 
             if (material == null)
             {
-                AddMaterial = new Material { Image = @"\materials\picture.png", MaterialType = MaterialTypes.First()};
+                AddMaterial = new Material { Image = @"\materials\picture.png", MaterialType = MaterialTypes.First() };
             }
             else
             {
@@ -105,9 +113,19 @@ namespace Chernovik.ViewModels
                 };
                 if (material.Supplier != null)
                 {
-                     SelectedMaterialSuppliers = new ObservableCollection<Supplier>(material.Supplier);
+                    SelectedMaterialSuppliers = new ObservableCollection<Supplier>(material.Supplier);
                 }
-            } 
+                if (material.CountInStock < material.MinCount)
+                {
+                    NeedToStore = (int)(material.MinCount - material.CountInStock);
+                    Unit = material.Unit;
+                    if (NeedToStore % material.CountInPack != 0)
+                        MinCountToBuy = (NeedToStore / material.CountInPack) + 1;
+                    else
+                        MinCountToBuy = NeedToStore / material.CountInPack;
+                    MinCountCost = (int)MinCountToBuy * material.Cost;
+                }
+            }
             SelectedMaterialType = AddMaterial.MaterialType;
             string directory = Environment.CurrentDirectory;
             ImageMaterial = GetImageFromPath(directory.Substring(0, directory.Length - 10) + "\\" + AddMaterial.Image);
@@ -138,17 +156,17 @@ namespace Chernovik.ViewModels
                 {
                     MessageBox.Show("Нужно выбрать поставщика из выпадающего списка!", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
-                } 
+                }
                 else if (SelectedMaterialSuppliers.Contains(SelectedSupplier))
                 {
                     MessageBox.Show("Материал уже содержит выбранный элемент!", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
                 else
                 {
-                SelectedMaterialSuppliers.Add(SelectedSupplier);
-                SignalChanged("SelectedMaterialSuppliers");
+                    SelectedMaterialSuppliers.Add(SelectedSupplier);
+                    SignalChanged("SelectedMaterialSuppliers");
                 }
-              
+
             });
 
             RemoveSupplier = new CustomCommand(() =>
@@ -160,10 +178,10 @@ namespace Chernovik.ViewModels
                 }
                 else
                 {
-                     SelectedMaterialSuppliers.Remove(SelectedMaterialSupplier);
-                     SignalChanged("SelectedMaterialSuppliers");
+                    SelectedMaterialSuppliers.Remove(SelectedMaterialSupplier);
+                    SignalChanged("SelectedMaterialSuppliers");
                 }
-                
+
             });
 
             Save = new CustomCommand(() =>
@@ -183,14 +201,14 @@ namespace Chernovik.ViewModels
                             connection.Material.Add(AddMaterial);
                         else
                         {
-                        connection.Entry(material).CurrentValues.SetValues(AddMaterial);
-                        material.Supplier = AddMaterial.Supplier;
-                        } 
+                            connection.Entry(material).CurrentValues.SetValues(AddMaterial);
+                            material.Supplier = AddMaterial.Supplier;
+                        }
                         connection.SaveChanges();
 
                         foreach (Window window in Application.Current.Windows)
                         {
-                            if (window.DataContext == this)  CloseWin(window);
+                            if (window.DataContext == this) CloseWin(window);
                         }
 
                         SignalChanged("Material");
@@ -201,7 +219,7 @@ namespace Chernovik.ViewModels
                     };
                 }
                 else return;
-               
+
             });
 
             Cancel = new CustomCommand(() =>
@@ -215,6 +233,63 @@ namespace Chernovik.ViewModels
                             CloseWin(window);
                         }
                     }
+                else return;
+            });
+
+            Delete = new CustomCommand(() =>
+            {
+                if(AddMaterial.ID == 0)
+                {
+                    MessageBox.Show("Текущая запись не создана", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                MessageBoxResult result = MessageBox.Show("Удалить безвозвратно?", "Подтвердите действие", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                {
+                    ProductMaterials = new List<ProductMaterial>(connection.ProductMaterial);
+                    foreach(ProductMaterial promat in ProductMaterials)
+                    {
+                        if(promat.Material == material || promat.MaterialID == material.ID)
+                        {
+                            MessageBox.Show("Удаление невозможно, материал используется на производстве!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                            return;
+                        }
+                    }
+                    MaterialCountHistorys = new List<MaterialCountHistory>(connection.MaterialCountHistory);
+                    foreach (MaterialCountHistory materialCountHistorie in MaterialCountHistorys)
+                    {
+                        if(materialCountHistorie.Material == material || materialCountHistorie.MaterialID == material.ID)
+                        {
+                            try
+                            {
+                                DBInstance.Get().MaterialCountHistory.Remove(materialCountHistorie);
+                            }
+                            catch (Exception e)
+                            {
+                                MessageBox.Show(e.Message);
+                            }
+                        }
+                    }
+                    try
+                    {
+                        DBInstance.Get().Material.Remove(material);
+                        DBInstance.Get().SaveChanges();
+                    }
+                    catch (Exception e)
+                    {
+
+                        MessageBox.Show(e.Message);
+                    }
+                    
+
+                    foreach (Window window in Application.Current.Windows)
+                {
+                    if (window.DataContext == this)
+                    {
+                        CloseWin(window);
+                    }
+                }
+               }
                 else return;
             });
 

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Chernovik.Views"
         mc:Ignorable="d"
-        Title="Редактирование материала" Height="500" Width="900" WindowStartupLocation="CenterScreen"  ResizeMode="NoResize">
+        Title="Редактирование материала" Height="500" Width="920" WindowStartupLocation="CenterScreen"  ResizeMode="NoResize">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
@@ -71,10 +71,25 @@
             <Label Content="Описание:"/>
             <TextBox AcceptsReturn="True" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap"  Height="180" Text="{Binding Description}"/>
         </StackPanel>
-        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal">
-            <Button Command="{Binding Cancel}" Content="Отмена" HorizontalAlignment="Left"/>
-            <Button Command="{Binding Save}"  Content="Сохранить" HorizontalAlignment="Right"/>
-            
+
+        <StackPanel Grid.Row="1" Grid.Column="3">
+            <Label Content="Необходимые затараты на пополнение:"/>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Нужно для пополнения:"/>
+                <Label Content="{Binding NeedToStore}" Width="auto"/>
+                <Label Content="{Binding Unit}" Width="auto"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Минимальный объём закупки:"/>
+                <Label Content="{Binding MinCountToBuy}" Width="80"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Стоимость закупки"/>
+                <Label Content="{Binding MinCountCost}" Width="80"/>
+            </StackPanel>
         </StackPanel>
+        <Button Command="{Binding Cancel}" Grid.Row="2" Grid.Column="3" Content="Отмена" HorizontalAlignment="Center"/>
+        <Button Command="{Binding Save}" Grid.Row="2" Grid.Column="3"  Content="Сохранить" HorizontalAlignment="Right"/>
+        <Button Command="{Binding Delete}" Grid.Row="2" Grid.Column="0"  Content="Удалить" HorizontalAlignment="Left"/>
     </Grid>
 </Window>
